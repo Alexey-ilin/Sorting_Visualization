@@ -1,3 +1,4 @@
+from pdb import run
 import pygame
 import random
 
@@ -90,11 +91,11 @@ class SortVisualizer:
             low, high = 0, len(self.bars) - 1
         if low < high:
             # pivot index such that elements lower then pivot are located on the left, and grater on the right
-            pi = self._quick_sort_partition(low, high)
+            pi = self._partition(low, high)
             self.quick_sort(low, pi-1)
             self.quick_sort(pi+1, high)
 
-    def _quick_sort_partition(self, low, high) -> int:
+    def _partition(self, low, high) -> int:
 
         pivot = self.bars[high]
         # pivot index
@@ -112,8 +113,36 @@ class SortVisualizer:
 
     # Tim Sort algorithm. Time = O(n logn) --- Memory = O(n)
     def tim_sort(self, MIN_MERGE=64):
-        pass
+        """Main function for Tim Sort
+
+        Args:
+            MIN_MERGE (int, optional): max run size -> so min possible merge. Defaults to 64.
+        """
+        run_size = self.calc_run_size(MIN_MERGE)
+        for start in range(0, len(self.bars), run_size):
+            end = min(start+run_size, len(self.bars))
+            # sorting each run using insertion sort
+            for i in range(start+1, end):
+                j = i
+                while j > start and self.bars[j] < self.bars[j-1]:
+                    self.bars[j-1], self.bars[j] = self.bars[j], self.bars[j-1]
+                    j -= 1
+
+        # merging each run
+        while run_size < len(self.bars):
+            for left in range(0, len(self.bars), 2*run_size):
+                mid = left + run_size
+                right = min(mid+run_size, len(self.bars)-1)
+                self._merge(left, right, mid)
+
+    def calc_run_size(self, MIN_MERGE) -> int:
+        r = 0
+        n = len(self.bars)
+        while n >= MIN_MERGE:
+            r |= n & 1
+            n >>= 1
+        return n+r
 
 
 if __name__ == "__main__":
-    SortVisualizer(num_of_bars=200, bar_width=3, sort_speed=10).quick_sort()
+    SortVisualizer(num_of_bars=200, bar_width=3, sort_speed=2).tim_sort()
