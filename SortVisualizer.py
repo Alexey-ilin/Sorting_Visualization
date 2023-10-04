@@ -27,6 +27,8 @@ class SortVisualizer:
             pygame.draw.rect(self.window, (0, 0, 255), bar_rect)
         pygame.display.update()
 
+        """Simple bubble sort algorithm"""
+
     def bubble_sort(self):
         for i in range(len(self.bars)):
             for j in range(len(self.bars) - 1 - i):
@@ -49,8 +51,12 @@ class SortVisualizer:
                 pygame.time.wait(self.sort_speed)
             self.bars[j+1] = key
 
+    """Simple Merge sort algo"""
+
     def merge_sort(self):
         self._merge_sort_helper()
+
+    """Auxiliary method (only for internal use)"""
 
     def _merge_sort_helper(self, start_idx=None, end_idx=None):
         if start_idx == None:
