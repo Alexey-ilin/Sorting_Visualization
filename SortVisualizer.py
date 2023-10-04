@@ -26,9 +26,9 @@ class SortVisualizer:
             bar_rect = pygame.Rect(x, y, self.bar_width, bar_height)
             pygame.draw.rect(self.window, (0, 0, 255), bar_rect)
         pygame.display.update()
+        pygame.time.wait(self.sort_speed)
 
-        """Simple bubble sort algorithm"""
-
+    # Simple bubble sort algorithm. Time = O(n^2) --- Memory = O(1)
     def bubble_sort(self):
         for i in range(len(self.bars)):
             for j in range(len(self.bars) - 1 - i):
@@ -36,10 +36,8 @@ class SortVisualizer:
                     self.bars[j], self.bars[j +
                                             1] = self.bars[j + 1], self.bars[j]
                     self._draw_bars()
-                    pygame.time.wait(self.sort_speed)
 
-    """Simple instertion sort algorithm"""
-
+    # Simple instertion sort algorithm. Time = O(n^2) --- Memory = O(1)
     def insertion_sort(self):
         for i in range(1, len(self.bars)):
             key = self.bars[i]
@@ -48,23 +46,21 @@ class SortVisualizer:
                 self.bars[j+1] = self.bars[j]
                 j -= 1
                 self._draw_bars()
-                pygame.time.wait(self.sort_speed)
             self.bars[j+1] = key
 
-    """Simple Merge sort algo"""
-
+    # Simple Merge sort algo. Time = O(n logn) --- Memory = O(n)
     def merge_sort(self):
-        self._merge_sort_helper()
+        self._merge()
 
-    """Auxiliary method (only for internal use)"""
-
-    def _merge_sort_helper(self, start_idx=None, end_idx=None):
-        if start_idx == None:
+    # Auxiliary method (only for internal use). Merge two subarrays and update self.bars
+    def _merge(self, start_idx=None, end_idx=None, mid_idx=None):
+        if start_idx == None and end_idx == None:
             start_idx, end_idx = 0, len(self.bars)-1
         if end_idx-start_idx > 0:
-            mid_idx = (end_idx+start_idx)//2
-            self._merge_sort_helper(start_idx, mid_idx)
-            self._merge_sort_helper(mid_idx+1, end_idx)
+            if not mid_idx:
+                mid_idx = (end_idx+start_idx)//2
+            self._merge(start_idx, mid_idx)
+            self._merge(mid_idx+1, end_idx)
             tmp = [None]*(end_idx-start_idx+1)
             i = start_idx
             j = mid_idx+1
@@ -87,8 +83,37 @@ class SortVisualizer:
                 k += 1
             self.bars[start_idx:end_idx+1] = tmp
             self._draw_bars()
-            pygame.time.wait(self.sort_speed)
+
+    # Quick sort algorigthm. Time = O(n^2) (avg nlogn) --- Memory = log(n) (Not stable (doesn't keep order))
+    def quick_sort(self, low=None, high=None):
+        if low == None and high == None:
+            low, high = 0, len(self.bars) - 1
+        if low < high:
+            # pivot index such that elements lower then pivot are located on the left, and grater on the right
+            pi = self._quick_sort_partition(low, high)
+            self.quick_sort(low, pi-1)
+            self.quick_sort(pi+1, high)
+
+    def _quick_sort_partition(self, low, high) -> int:
+
+        pivot = self.bars[high]
+        # pivot index
+        i = low - 1
+
+        for j in range(low, high):
+            if self.bars[j] <= pivot:
+                i += 1
+                (self.bars[i], self.bars[j]) = (self.bars[j], self.bars[i])
+                self._draw_bars()
+
+        self.bars[high], self.bars[i+1] = self.bars[i+1], self.bars[high]
+        self._draw_bars()
+        return i + 1
+
+    # Tim Sort algorithm. Time = O(n logn) --- Memory = O(n)
+    def tim_sort(self, MIN_MERGE=64):
+        pass
 
 
 if __name__ == "__main__":
-    SortVisualizer(num_of_bars=200, bar_width=3, sort_speed=10).merge_sort()
+    SortVisualizer(num_of_bars=200, bar_width=3, sort_speed=10).quick_sort()
