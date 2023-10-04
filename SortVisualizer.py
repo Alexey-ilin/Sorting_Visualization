@@ -1,24 +1,30 @@
+from functools import wraps
+import sys
+import time
 import pygame
 import random
 import BinaryTree
+
+sys.setrecursionlimit(10000)
 
 
 class SortVisualizer:
     def __init__(self, num_of_bars=100, max_bar_height=500, bar_width=4, bar_margin=1, sort_speed=5, visualize=True):
         pygame.init()
-        self.window_width = num_of_bars * (bar_width + bar_margin)
-        self.window_height = max_bar_height + 50
-        self.window = pygame.display.set_mode(
-            (self.window_width, self.window_height))
-        pygame.display.set_caption("Sort Visualizer")
         self.num_of_bars = num_of_bars
         self.max_bar_height = max_bar_height
         self.bar_width = bar_width
         self.bar_margin = bar_margin
-        self.sort_speed = sort_speed
-        self.bars = [random.randint(1, max_bar_height)
-                     for _ in range(num_of_bars)]
+        self.bars = [random.randint(1, self.max_bar_height)
+                     for _ in range(self.num_of_bars)]
         self.visualize = visualize
+        if self.visualize:
+            self.window_width = num_of_bars * (bar_width + bar_margin)
+            self.window_height = max_bar_height + 50
+            self.window = pygame.display.set_mode(
+                (self.window_width, self.window_height))
+            pygame.display.set_caption("Sort Visualizer")
+            self.sort_speed = sort_speed
 
     def _draw_bars(self):
         if self.visualize:
@@ -180,12 +186,82 @@ class SortVisualizer:
                 j += 1
             gap = gap//2
 
-    # TODO
     # Tree sort algo. Time = O(n logn) --- Memory = O(n)
     def tree_sort(self):
-        root = self._insert_rec(root, value)
+        self._draw_bars()
+        root = None
+        for value in self.bars:
+            root = self._insert_recursive(root, value)
+        self.bars = self._lefttoright_traverse(root)
+        self._draw_bars()
+        pygame.time.wait(1000)
+
+    # recursevly populate binary tree
+    def _insert_recursive(self, root: BinaryTree.Node, value: int):
+        if not root:
+            root = BinaryTree.Node(value)
+            return root
+
+        if value < root.value:
+            root.left = self._insert_recursive(root.left, value)
+        elif value >= root.value:
+            root.right = self._insert_recursive(root.right, value)
+
+        return root
+
+    # traverse binary tree
+    @classmethod
+    def _lefttoright_traverse(cls, root: BinaryTree.Node, tmp: list = list()):
+        if root:
+            cls._lefttoright_traverse(root.left, tmp)
+            tmp.append(root.value)
+            cls._lefttoright_traverse(root.right, tmp)
+            return tmp
+
+
+def test_time_exec():
+
+    vis = SortVisualizer(num_of_bars=5000, bar_width=0,
+                         sort_speed=0, max_bar_height=5000, visualize=False)
+    start = time.perf_counter()
+    sorted(vis.bars)
+    end = time.perf_counter()
+    print(f"Built-in sorted function excecutes in {end-start:.4f} sec")
+    start = time.perf_counter()
+    vis.bubble_sort()
+    end = time.perf_counter()
+    print(f"Bubble sort algo excecutes in {end-start:.4f} sec")
+    start = time.perf_counter()
+    vis.merge_sort()
+    end = time.perf_counter()
+    print(f"Merge sort algo excecutes in {end-start:.4f} sec")
+    start = time.perf_counter()
+    vis.quick_sort()
+    end = time.perf_counter()
+    print(f"Quick sort algo excecutes in {end-start:.4f} sec")
+    # start = time.perf_counter()
+    # vis.tim_sort()
+    # end = time.perf_counter()
+    # print(f"Tim sort algo excecutes in {end-start:.4f} sec")
+    start = time.perf_counter()
+    vis.tree_sort()
+    end = time.perf_counter()
+    print(f"Tree sort algo excecutes in {end-start:.4f} sec")
+    start = time.perf_counter()
+    vis.insertion_sort()
+    end = time.perf_counter()
+    print(f"Insertion sort algo excecutes in {end-start:.4f} sec")
+    start = time.perf_counter()
+    vis.selection_sort()
+    end = time.perf_counter()
+    print(f"Selection sort algo excecutes in {end-start:.4f} sec")
+    start = time.perf_counter()
+    vis.shell_sort()
+    end = time.perf_counter()
+    print(f"Shell sort algo excecutes in {end-start:.4f} sec")
 
 
 if __name__ == "__main__":
-    SortVisualizer(num_of_bars=600, bar_width=2,
-                   sort_speed=2, max_bar_height=900).tree_sort()
+    # SortVisualizer(num_of_bars=1000, bar_width=0,
+    #    sort_speed=0, max_bar_height=1000, visualize=False).quick_sort()
+    test_time_exec()
