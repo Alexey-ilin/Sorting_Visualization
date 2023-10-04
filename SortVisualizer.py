@@ -1,10 +1,10 @@
-from pdb import run
 import pygame
 import random
+import BinaryTree
 
 
 class SortVisualizer:
-    def __init__(self, num_of_bars=100, max_bar_height=500, bar_width=4, bar_margin=1, sort_speed=5):
+    def __init__(self, num_of_bars=100, max_bar_height=500, bar_width=4, bar_margin=1, sort_speed=5, visualize=True):
         pygame.init()
         self.window_width = num_of_bars * (bar_width + bar_margin)
         self.window_height = max_bar_height + 50
@@ -18,16 +18,18 @@ class SortVisualizer:
         self.sort_speed = sort_speed
         self.bars = [random.randint(1, max_bar_height)
                      for _ in range(num_of_bars)]
+        self.visualize = visualize
 
     def _draw_bars(self):
-        self.window.fill((255, 255, 255))
-        for i, bar_height in enumerate(self.bars):
-            x = i * (self.bar_width + self.bar_margin) + self.bar_margin
-            y = self.max_bar_height - bar_height + 10
-            bar_rect = pygame.Rect(x, y, self.bar_width, bar_height)
-            pygame.draw.rect(self.window, (0, 0, 255), bar_rect)
-        pygame.display.update()
-        pygame.time.wait(self.sort_speed)
+        if self.visualize:
+            self.window.fill((255, 255, 255))
+            for i, bar_height in enumerate(self.bars):
+                x = i * (self.bar_width + self.bar_margin) + self.bar_margin
+                y = self.max_bar_height - bar_height + 10
+                bar_rect = pygame.Rect(x, y, self.bar_width, bar_height)
+                pygame.draw.rect(self.window, (0, 0, 255), bar_rect)
+            pygame.display.update()
+            pygame.time.wait(self.sort_speed)
 
     # Simple bubble sort algorithm. Time = O(n^2) --- Memory = O(1)
     def bubble_sort(self):
@@ -143,6 +145,47 @@ class SortVisualizer:
             n >>= 1
         return n+r
 
+    # Selection sort. Time = O(n^2) --- Memory = O(1)
+
+    def selection_sort(self):
+        for i in range(len(self.bars)-1):
+            cur_min = i
+            for j in range(i+1, len(self.bars)):
+                if self.bars[cur_min] > self.bars[j]:
+                    cur_min = j
+            self.bars[i], self.bars[cur_min] = self.bars[cur_min], self.bars[i]
+            self._draw_bars()
+
+    # Shell sort. Time = O(n^3/2) --- Memory = O(1)
+    def shell_sort(self):
+        gap = len(self.bars) // 2
+        while gap > 0:
+            j = gap
+            # Check the array in from left to right
+            # Till the last possible index of j
+            while j < len(self.bars):
+                i = j-gap  # This will keep help in maintain gap value
+
+                while i >= 0:
+                    # If value on right side is already greater than left side value
+                    # We don't do swap else we swap
+                    if self.bars[i+gap] > self.bars[i]:
+
+                        break
+                    else:
+                        self.bars[i+gap], self.bars[i] = self.bars[i], self.bars[i+gap]
+                    self._draw_bars()
+                    i = i-gap  # To check left side also
+                    # If the element present is greater than current element
+                j += 1
+            gap = gap//2
+
+    # TODO
+    # Tree sort algo. Time = O(n logn) --- Memory = O(n)
+    def tree_sort(self):
+        root = self._insert_rec(root, value)
+
 
 if __name__ == "__main__":
-    SortVisualizer(num_of_bars=200, bar_width=3, sort_speed=2).tim_sort()
+    SortVisualizer(num_of_bars=600, bar_width=2,
+                   sort_speed=2, max_bar_height=900).tree_sort()
